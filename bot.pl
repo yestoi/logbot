@@ -31,7 +31,7 @@ while (my $lines = <$sock>) {
 	}
 	else {
 		if ($lines =~ /^:(.+)!.*:(.+)$/) {
-			print "<" .$1. ">" . $2 . "\n";
+			print "<" .$1. "> " . $2 . "\n";
 		}
 	}
 }
