@@ -5,6 +5,7 @@ use IO::Socket;
 my $nick = "logbot";
 my $server = "irc.undergroundsystems.org";
 my $channel = "#underground_systems";
+my $pass = "IAMAMADDAFAKKINGLOGBOT"
 
 my $sock = new IO::Socket::INET(PeerAddr => $server,
 								PeerPort => 6667,
@@ -22,6 +23,7 @@ while (my $in = <$sock>) {
 	}
 }
 
+print $sock "MSG NickServ $pass"
 print $sock "JOIN $channel\r\n";
 
 while (my $lines = <$sock>) {
