@@ -11,7 +11,7 @@ my $sock = new IO::Socket::INET(PeerAddr => $server,
 								Proto => 'tcp') or
 									die "Put my socks on!";
 print $sock "NICK $nick\r\n";
-print $sock "USER $nick 8 * :logbot\r\n";
+print $sock "USER $nick 8 * :$nick\r\n";
 
 while (my $in = <$sock>) {
 	if ($in =~ /004/) {	
@@ -30,6 +30,8 @@ while (my $lines = <$sock>) {
 		print $sock "PONG $1\r\n";
 	}
 	else {
-		print "$lines\n"
+		if ($lines =~ /^:(.+)!.*:(.+)$/) {
+			print "<" .$1. ">" . $2 . "\n";
+		}
 	}
 }
