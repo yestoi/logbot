@@ -30,6 +30,7 @@ print $sock "JOIN $channel\r\n";
 
 my $old_time = time;
 my @buffer = ();
+my @row = ();
 
 while (my $line = <$sock>) 
 {
@@ -48,12 +49,12 @@ while (my $line = <$sock>)
     # Check timers and update file/filenames
     my (undef, undef, undef, $day, $month) = localtime();
 
-    if (time-$old_time >= 900) { # 900 sec = 15 min
+    if (time-$old_time >= 15) { # 900 sec = 15 min
         open LOGFILE, ">>$file-$month-$day.txt" or die $!;
 
         my $i = 0;
-        while (my @row = @{$buffer[$i++]}) {
-            print LOGFILE "<", $buffer[0], "> ", $buffer[1], "\n";
+        while (@row = @{$buffer[$i++]}) {
+            print LOGFILE "<", $row[0], "> ", $row[1], "\n";
         }
 
         @buffer = (); 
