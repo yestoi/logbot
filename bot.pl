@@ -6,6 +6,7 @@ my $nick = "logbot";
 my $server = "irc.undergroundsystems.org";
 my $channel = "#HaKT_Dev";
 my $pass = "IAMAMADDAFAKKINGLOGBOT";
+my $file = "logfile"; #This the base log file name. It'll be postfix'd with '-MM-DD'
 
 my $sock = new IO::Socket::INET(PeerAddr => $server,
                                 PeerPort => 6667,
@@ -27,14 +28,35 @@ print $sock "PRIVMSG NickServ IDENTIFY $pass\r\n";
 sleep 3;
 print $sock "JOIN $channel\r\n";
 
+my $old_time = time;
+my @buffer = ();
+
 while (my $lines = <$sock>) {
+
+    # Handle io with server
 	chop $lines;
 	if ($lines =~ /^PING(.*)$/i) {
 		print $sock "PONG $1\r\n";
 	}
 	else {
 		if ($lines =~ /^:(.+)!.*:(.+)$/) {
-			print "<" .$1. "> " . $2 . "\n";
+            push (@buffer, [$1, $2]);
+            print "<" .$1. "> " . $2 . "\n";
 		}
 	}
+
+    # Check timers and update file/filenames
+    my (undef, undef, undef, $day, $month) = localtime();
+
+    if (time-$old_time == 900) { # 900 sec = 15 min
+        open LOGFILE, ">>$file-$month-$day.txt" or die $!;
+
+        my $i = 0;
+        while (my @row = @{$buffer[$i++]}) {
+            print LOGFILE "<", $buffer[0], "> ", $buffer[1], "\n";
+        }
+        @buffer = (); 
+        $old_time = time;
+        close LOGFILE;
+    }
 }
