@@ -1,7 +1,7 @@
 use strict;
 use IO::Socket;
 
-#Do config lookup
+#configuration
 my $nick = "logbot";
 my $server = "irc.undergroundsystems.org";
 my $channel = "#HaKT_Dev";
@@ -31,15 +31,15 @@ print $sock "JOIN $channel\r\n";
 my $old_time = time;
 my @buffer = ();
 
-while (my $lines = <$sock>) {
-
+while (my $line = <$sock>) 
+{
     # Handle io with server
-	chop $lines;
-	if ($lines =~ /^PING(.*)$/i) {
+	chop $line;
+	if ($line =~ /^PING(.*)$/i) {
 		print $sock "PONG $1\r\n";
 	}
 	else {
-		if ($lines =~ /^:(.+)!.*:(.+)$/) {
+		if ($line =~ /^:(.+)!.*:(.+)$/) {
             push (@buffer, [$1, $2]);
             print "<" .$1. "> " . $2 . "\n";
 		}
@@ -48,13 +48,14 @@ while (my $lines = <$sock>) {
     # Check timers and update file/filenames
     my (undef, undef, undef, $day, $month) = localtime();
 
-    if (time-$old_time == 900) { # 900 sec = 15 min
+    if (time-$old_time >= 900) { # 900 sec = 15 min
         open LOGFILE, ">>$file-$month-$day.txt" or die $!;
 
         my $i = 0;
         while (my @row = @{$buffer[$i++]}) {
             print LOGFILE "<", $buffer[0], "> ", $buffer[1], "\n";
         }
+
         @buffer = (); 
         $old_time = time;
         close LOGFILE;
