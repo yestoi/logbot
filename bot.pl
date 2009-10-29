@@ -1,4 +1,5 @@
 use strict;
+use diagnostics;
 use IO::Socket;
 
 #configuration
@@ -29,8 +30,8 @@ sleep 3;
 print $sock "JOIN $channel\r\n";
 
 my $old_time = time;
-my @buffer = ();
-my @row = ();
+my @buffer = (["", ""]);
+my $count = 0;
 
 while (my $line = <$sock>) 
 {
@@ -42,7 +43,7 @@ while (my $line = <$sock>)
 	else {
 		if ($line =~ /^:(.+)!.*:(.+)$/) {
             push (@buffer, [$1, $2]);
-            print "<" .$1. "> " . $2 . "\n";
+            #print "<" .$1. "> " . $2 . "\n";
 		}
 	}
 
@@ -53,7 +54,8 @@ while (my $line = <$sock>)
         open LOGFILE, ">>$file-$month-$day.txt" or die $!;
 
         my $i = 0;
-        while (@row = @{$buffer[$i++]}) {
+		push (@buffer, []);
+        while (my @row = @{$buffer[++$i]}) {
             print LOGFILE "<", $row[0], "> ", $row[1], "\n";
         }
 
