@@ -57,6 +57,7 @@ while (my $line = <$sock>)
         }
 
         @buffer = (); 
+		push (@buffer, []);
         $old_time = time;
         close LOGFILE;
     }
