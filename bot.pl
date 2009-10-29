@@ -44,7 +44,7 @@ while (my $line = <$sock>)
             push (@buffer, [$1, $2]);
             #print "<" .$1. "> " . $2 . "\n";
             if ($2 =~ /^!$nick/) {
-                print $sock "PRIVMSG $1 Logs: ftp://hakt:GiveMEmaLOG\@crazzy.se\r\n";
+                print $sock "PRIVMSG $channel $1 asked for Logs: ftp://hakt:GiveMEmaLOG\@crazzy.se\r\n";
             }
 		}
 	}
