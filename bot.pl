@@ -42,9 +42,9 @@ while (my $line = <$sock>)
 	else {
 		if ($line =~ /^:(.+)!.*:(.+)$/) {
             push (@buffer, [$1, $2]);
-            #print "<" .$1. "> " . $2 . "\n";
+            my $user = $1;
             if ($2 =~ /^!$nick/) {
-                print $sock "PRIVMSG $channel $1 asked for Logs: ftp://hakt:GiveMEmaLOG\@crazzy.se\r\n";
+                print $sock "PRIVMSG $channel $user asked for Logs: ftp://hakt:GiveMEmaLOG\@crazzy.se\r\n";
             }
 		}
 	}
