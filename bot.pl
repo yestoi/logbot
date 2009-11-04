@@ -7,7 +7,7 @@ my $nick = "logbot";
 my $server = "irc.undergroundsystems.org";
 my $channel = "#HaKT_Dev";
 my $pass = "IAMAMADDAFAKKINGLOGBOT";
-my $file = "logfile"; #This the base log file name. It'll be postfix'd with '-MM-DD'
+my $file = "logfile"; # This the base log file name. It'll be postfix'd with '-DD-MM'
 
 my $sock = new IO::Socket::INET(PeerAddr => $server,
                                 PeerPort => 6667,
@@ -18,9 +18,10 @@ print $sock "USER $nick 8 * :$nick\r\n";
 
 while (my $in = <$sock>) {
 	if ($in =~ /266/) {	
+        # Connected, go onto main loop
 		last;
 	}	
-	elsif ($in =~ /433/) {  #Check if nick is in use
+	elsif ($in =~ /433/) {  # Check if nick is in use
 		die "Who dat?";
 	}
 }
@@ -34,24 +35,40 @@ my @buffer = (["", ""]);
 
 while (my $line = <$sock>) 
 {
-    # Handle io with server
 	chop $line;
-	if ($line =~ /^PING(.*)$/i) {
+
+    # Handle response to server. 
+	if ($line =~ /^PING(.*)$/i) { 
 		print $sock "PONG $1\r\n";
 	}
+
+    # Add output to buffer and handle user input
 	else {
+        # Only get user input, not server output
 		if ($line =~ /^:(.+)!.*:(.+)$/) {
-            push (@buffer, [$1, $2]);
             my $user = $1;
-            if ($2 =~ /^!$nick/ && $line =~ /$channel/) {
+            my $msg = $2;
+
+            # Don't log redundant stuff
+            if ($msg =~ /^Leaving$/ or $msg =~ /^$channel/ or $msg =~ /^Connection reset by peer/) {
+                next;
+            }
+            else {
+                push (@buffer, [$1, $2]);
+            }
+
+            # Commands (Always add '$line =~ /$channel/' at the end of your conditionals)
+            if ($msg =~ /^!$nick/ && $line =~ /$channel/) {
                 print $sock "PRIVMSG $user Logs: ftp://hakt:GiveMEmaLOG\@crazzy.se\r\n";
             }
+            # Add more commands here. 
 		}
 	}
 
-    if (time-$old_time >= 60) { # 900 sec = 15 min
+    # Write log file
+    if (time-$old_time >= 60) { # Write file every 60 seconds
 		my (undef, undef, undef, $day, $month) = localtime();
-        open LOGFILE, ">>$file-$month-$day.txt" or die $!;
+        open LOGFILE, ">>$file-$day-$month.txt" or die $!;
 
         my $i = 0;
 		push (@buffer, []);
